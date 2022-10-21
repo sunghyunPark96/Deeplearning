@@ -1,6 +1,5 @@
 import tqdm
 import torch
-import numpy as np
 import pandas as pd
 import torch.nn as nn
 import matplotlib.pyplot as plt
@@ -8,7 +7,6 @@ import matplotlib.pyplot as plt
 from torch.utils.data.dataset import Dataset
 from torch.optim.adam import Adam
 from torch.utils.data.dataloader import DataLoader
-
 
 class Netflix(Dataset):
     def __init__(self,data):
