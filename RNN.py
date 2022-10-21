@@ -77,54 +77,58 @@ if __name__ == "__main__":
     save_path = "C:/Users/MOBIS/Desktop/딥러닝 공부 자료/딥러닝 알고리즘 구현/RNN/model/RNN_epoch200.pt"
     criterion = nn.MSELoss()
     optim = Adam(params=RNN_model.parameters(),lr=lr)
-
     signal = input(str("train : y or test : n "))
 
-    if signal == "y":
-        for i in range(epoch):
-            RNN_model.train()
-            iterator = tqdm.tqdm(train_dataloader)
-            epoch_loss = 0
+    try:
+        if signal == "y":
+            for i in range(epoch):
+                RNN_model.train()
+                iterator = tqdm.tqdm(train_dataloader)
+                epoch_loss = 0
 
-            for data,label in iterator:
-                optim.zero_grad()
-                h0 = torch.zeros(5, data.shape[0],8).to(device=device) # h0 초기화 (5,30,3,8)
+                for data,label in iterator:
+                    optim.zero_grad()
+                    h0 = torch.zeros(5, data.shape[0],8).to(device=device) # h0 초기화 (5,30,3,8)
 
-                pred = RNN_model(data.to(device=device),h0)
-                loss = criterion(pred,label.to(device=device))
-                batch_loss = loss.item()
-                epoch_loss += batch_loss
+                    pred = RNN_model(data.to(device=device),h0)
+                    loss = criterion(pred,label.to(device=device))
+                    batch_loss = loss.item()
+                    epoch_loss += batch_loss
 
-                loss.backward()
-                optim.step()
+                    loss.backward()
+                    optim.step()
 
-            avg_epoch_loss = epoch_loss / len(train_dataloader)
+                avg_epoch_loss = epoch_loss / len(train_dataloader)
 
-            iterator.set_description(f"epoch{i+1} loss : {avg_epoch_loss}")
-            print(iterator)
+                iterator.set_description(f"epoch{i+1} loss : {avg_epoch_loss}")
+                print(iterator)
 
-        torch.save(RNN_model.state_dict(),save_path)
+            torch.save(RNN_model.state_dict(),save_path)
 
-    if signal == "n":
+        elif signal == "n":
 
-        preds = []
-        total_loss = 0
+            preds = []
+            total_loss = 0
 
-        with torch.no_grad():
-            RNN_test_model.eval()
-            RNN_test_model.load_state_dict(torch.load(save_path))
+            with torch.no_grad():
+                RNN_test_model.eval()
+                RNN_test_model.load_state_dict(torch.load(save_path))
 
-            for data,label in test_dataloader:
-                h0 = torch.zeros(5,data.shape[0],8).to(device=device)
-                pred = RNN_test_model(data.to(device=device),h0)
-                preds.append(pred.item())
+                for data,label in test_dataloader:
+                    h0 = torch.zeros(5,data.shape[0],8).to(device=device)
+                    pred = RNN_test_model(data.to(device=device),h0)
+                    preds.append(pred.item())
 
-                loss = criterion(pred, label.to(device=device))
+                    loss = criterion(pred, label.to(device=device))
 
-                total_loss += loss/(len(test_dataloader))
+                    total_loss += loss/(len(test_dataloader))
 
-        plt.plot(preds, label="prediction")
-        plt.plot(dataset.label[30:].reset_index().drop(columns="index"),label="actual")
-        plt.legend()
-        plt.show()
-        print("git test")
+            plt.plot(preds, label="prediction")
+            plt.plot(dataset.label[30:].reset_index().drop(columns="index"),label="actual")
+            plt.legend()
+            plt.show()
+        else :
+            raise Exception("please input only y or n ")
+        
+    except Exception as e:
+        print("input 예외 발생 : ",e)
